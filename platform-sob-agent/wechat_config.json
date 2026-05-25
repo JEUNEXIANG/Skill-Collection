@@ -1,0 +1,20 @@
+{
+  "_comment": "Configure your WeChat notification channel. Choose ONE method and fill in its fields.",
+
+  "method": "terminal",
+
+  "_method_options": {
+    "terminal": "Print to terminal only — for local testing, no WeChat needed",
+    "wxpusher": "Personal WeChat via WxPusher subscription account (https://wxpusher.zjiecode.com)",
+    "wecom_webhook": "企业微信 (WeCom) group bot webhook"
+  },
+
+  "_wxpusher_fields": {
+    "app_token": "AT_XXXXXXXXXXXXXXXX",
+    "uid": "UID_XXXXXXXXXXXXXXXX"
+  },
+
+  "_wecom_webhook_fields": {
+    "webhook_url": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=XXXX"
+  }
+}
