@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "installed": {
+    "google-sheets": {
+      "source": "lobehub",
+      "identifier": "lobehub/google-sheets",
+      "trust_level": "community",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:b59336eb27194441",
+      "install_path": "google-sheets",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "installed_at": "2026-04-24T07:15:01.891228+00:00",
+      "updated_at": "2026-04-24T07:15:01.891254+00:00"
+    }
+  }
+}
