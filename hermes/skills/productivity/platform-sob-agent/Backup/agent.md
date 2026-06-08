@@ -74,16 +74,14 @@ Read the table structure of the following tabs using the google-sheets-intellige
 
 #### Step 2 — Copy SOB Values (ADG ADO) to New Duplicated Tab in [Reg CNLS copy]
 
-1. In tab `SHP/TTS ADG ADO` of `[Weekly Live View]`, identify the "red section":
-   - Use the raw Sheets API color-read pattern to find all cells where `effectiveFormat.backgroundColor` matches red (RGB approx. `{red: 0.96, green: 0.80, blue: 0.80}`).
-   - Present the detected range to the user for confirmation.
+1. Read data from tab `SHP/TTS ADG ADO` of `[Weekly Live View]` (or fallback `Sheet6`/`Sheet5` if IMPORTRANGE is broken).
 2. In `[Reg CNLS copy]`, find the tab with the most recent date (format: `YY/MM/DD ADG ADO`).
 3. Duplicate that tab. Name the new tab: `{YY}/{MM}/{DD} ADG ADO` using **today's date** (Thursday, Asia/Shanghai).
    - Date format: `YY/MM/DD` — e.g. `26/05/14` = year 2026, month 05, day 14.
    - Place the new tab in **chronological date order** among existing tabs.
    - If a tab with today's date already exists: **do NOT overwrite**. Log warning, notify via WeChat, and halt.
 4. Present the full intended paste plan (source range → destination range; layout preserved: ADO↔ADO, ADG↔ADG, SHP↔SHP, TTS↔TTS).
-5. **Wait for user confirmation**, then paste the red section values **as values only** (no formulas).
+5. **Wait for user confirmation**, then paste the source values **as values only** (no formulas).
 
 ---
 

@@ -13,10 +13,11 @@ TOKEN_PATH = os.path.expanduser("~/.hermes/google_token.json")
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 SHEETS = {
-    "Weekly Live View": "1VjeWOSX6nX_oQiU8QnB98suG2siKovuJhoBzxTK-zeI",
-    "Reg Commercial Team": "10kH9Welrxx7KJEOrtfWFshOrglsG-P6vTv9otwxsPho",
+    "Weekly Live View": "1m4bZ11zDEHpVzQP1I4zxtFKs-vzXEYBk7NgMNJK5dpo",  # Updated 2026-05-28
+    "Reg Commercial Team": "1BmRS6VjIP5_RRfQs22pgm9Ap49G_EBZJIjJDCAhmAcg",  # Updated 2026-05-28
     "Reg CNLS copy": "1cN29heWI-7trzBLMvEpznXslDmlCEmLHUcKDjT9uTqg",
     "Archive": "1F99kNADGaRxiuxkxG2Gq3A7Xvoh_bG0EM2C0xYi8Ocs",
+    "Platform PC2": "11Qqg42jx_jAhfmkjr8JghVa4zwiVXdAsuo3aOGxvVKo",  # Updated 2026-05-28
 }
 
 

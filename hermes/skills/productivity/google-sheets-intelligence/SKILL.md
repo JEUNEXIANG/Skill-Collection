@@ -822,6 +822,43 @@ Don't assume API success = user visibility. Always verify from the user's perspe
    Always verify by reading `effectiveFormat.backgroundColor` after making changes — if it doesn't match what you set, conditional formatting is interfering.
 8. **Formatting changes only affect the visual appearance** — cell values, formulas, and data integrity are preserved. Background color changes via `repeatCell` with `fields: "userEnteredFormat.backgroundColor"` are purely cosmetic.
 
+## Adding New Month Rows to Formula-Driven Stacked Tables (Critical Pattern)
+
+When a user asks you to add a new month row (e.g., Jun'26 below May'26) to a sheet with stacked formula-driven tables, follow this workflow. This has a critical pitfall: **replicate the formula pattern, not the values.**
+
+### The Formula Trap
+
+When the user says "follow the same pattern as previous months," they mean the **formula structure**, not the numeric values. Reading with `FORMATTED_VALUE` shows the computed result (e.g., `4.03 x`) -- you need `FORMULA` render option to see the actual references (e.g., `=C73/C112`).
+
+**Always read formulas first:**
+```python
+result = service.spreadsheets().values().get(
+    spreadsheetId=SID, range="Sheet1!A15:W15",
+    valueRenderOption='FORMULA'  # Shows "=C74/C113" not "3.96 x"
+).execute()
+```
+
+### The Workflow
+
+1. **Map reference patterns**: Read a few existing month rows with `FORMULA` to understand how each column is calculated.
+
+2. **Insert rows bottom-to-top**: Use `insertDimension` from largest row index to smallest to avoid position shifts.
+
+3. **Write formulas with incremented references**: Build formula strings with row references pointing to the new month's data rows (e.g., May `=C74/C113` becomes Jun `=C75/C114`). Use `valueInputOption='USER_ENTERED'`.
+
+4. **Copy formatting**: Use `copyPaste` with `pasteType: 'PASTE_FORMAT'` to copy formatting without overwriting formulas.
+
+5. **Clearing cells safely**: When the user asks to delete numbers, read with `FORMULA` first -- only clear cells that are static numbers (no `=` prefix), never clear formulas.
+
+```python
+def is_static_number(val_str):
+    if not val_str or not str(val_str).strip(): return False
+    s = str(val_str).strip()
+    if s.startswith('='): return False
+    try: float(s.replace(',', '')); return True
+    except: return False
+```
+
 ## Creating Cross-Sheet Formula Dashboards (INDEX/MATCH)
 
 When a user asks you to pull data from one sheet/tab into another using INDEX MATCH formulas, follow this workflow. This is a non-trivial multi-step operation that requires understanding the source data structure, generating formulas programmatically, and handling formatting correctly.
