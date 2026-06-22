@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>电商运营 Agent · User Flow 设计</title>
+<style>
+:root{ --ink:#1f2328; --muted:#57606a; --line:#d0d7de; --bg-soft:#f6f8fa; --accent:#0969da; --warn:#9a6700; }
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+  font-size:15px; line-height:1.75; background:#fff;
+}
+.wrap{ max-width:1120px; margin:0 auto; padding:48px 56px 80px; }
+h1,h2,h3,h4{ line-height:1.3; font-weight:700; }
+h1{ font-size:28px; margin:0 0 8px; padding-bottom:14px; border-bottom:2px solid var(--ink); }
+h2{ font-size:21px; margin:38px 0 14px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+h3{ font-size:17px; margin:26px 0 10px; color:#1f2328; }
+h4{ font-size:15px; margin:18px 0 8px; }
+p{ margin:10px 0; }
+ul,ol{ margin:10px 0; padding-left:24px; }
+li{ margin:5px 0; }
+strong{ font-weight:700; }
+a{ color:var(--accent); text-decoration:none; }
+hr{ border:0; border-top:1px solid var(--line); margin:28px 0; }
+blockquote{
+  margin:14px 0; padding:10px 16px; color:#3a3f45;
+  background:var(--bg-soft); border-left:4px solid #c3cad1; border-radius:0 6px 6px 0;
+}
+blockquote p{ margin:6px 0; }
+code{
+  font-family:"SF Mono","Menlo","Consolas","Liberation Mono",monospace;
+  background:rgba(175,184,193,.22); padding:.15em .4em; border-radius:5px; font-size:.88em;
+}
+pre{
+  background:var(--bg-soft); border:1px solid var(--line); border-radius:8px;
+  padding:14px 16px; overflow-x:auto; line-height:1.45; margin:14px 0;
+}
+pre code{
+  background:none; padding:0; border-radius:0; font-size:12.5px;
+  font-family:"SF Mono","Menlo","Consolas","Liberation Mono",monospace; white-space:pre;
+}
+table{ border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px; }
+th,td{ border:1px solid var(--line); padding:8px 11px; text-align:left; vertical-align:top; }
+th:first-child,td:first-child{ white-space:nowrap; }
+th{ background:var(--bg-soft); font-weight:700; }
+tr:nth-child(even) td{ background:#fbfcfd; }
+.wrap > blockquote:first-of-type{ background:#fff8e6; border-left-color:#e3b341; }
+@media print{
+  @page{ size:A4; margin:16mm 14mm; }
+  .wrap{ max-width:none; padding:0; }
+  h2{ break-after:avoid; }
+  h3,h4{ break-after:avoid; }
+  pre,table,blockquote{ break-inside:avoid; }
+  body{ font-size:11.5pt; }
+  pre code{ font-size:9pt; }
+  table{ font-size:9.5pt; }
+}
+</style>
+</head>
+<body><article class="wrap"><blockquote>
+<p><strong>面试题</strong>:设计一个 Agent,帮助用户从一个模糊目标开始,持续完成一项复杂任务(如&quot;帮我做一个电商自动化运营的 Agent&quot;)。请设计从用户输入到任务完成的 user flow,包括关键界面状态、用户确认点、失败兜底和结果交付方式。</p>
+</blockquote>
+<blockquote>
+<p><strong>AI 协作说明</strong>:本方案的核心思路与框架由本人提出;AI(Claude)负责方案细节细化和撰写与语言风格润色。</p>
+</blockquote>
+<hr>
+<h2>0. 开篇:场景 + 能力边界</h2>
+<h3>(1) 用户和场景</h3>
+<ul>
+<li><strong>目标用户:成长期中小跨境卖家(1–5 人)</strong>
+<ul>
+<li><strong>信息缺乏</strong>:经验不足,不熟平台规则与合规红线,易违规受罚</li>
+<li><strong>缺运营 ideas</strong>:不知道选什么品、怎么定价、怎么做活动、怎么写 listing</li>
+<li><strong>人力紧、时间碎</strong>:一人身兼多职,被琐碎重复的执行占满</li>
+<li><strong>决策快、掌控力强</strong>:团队小、链条短,每人对全店决策权重大、能即时拍板(决策成本远低于大店铺)</li>
+<li><strong>风险敏感</strong>:涉及花钱(广告)与改店铺(上架/改价),操作失误代价真实且常不可逆</li>
+</ul>
+</li>
+<li><strong>痛点</strong>:
+<ul>
+<li><strong>缺运营知识</strong>:不懂开店流程、平台规则,日常运营(选品 / 定价 / 详情 / 客服 / 广告 / 复盘)琐碎高频却无从下手</li>
+<li><strong>规模小</strong>:不适合「大 infra + 规模化部署 AI 中台」的重型 ToB 方案,需要轻量、即开即用的助手</li>
+</ul>
+</li>
+<li><strong>典型场景</strong>:开店、广告投流方案、大促方案、税务/财务等——共性是商家普遍缺信息、缺决策思路与经验。</li>
+</ul>
+<h3>(2) Agent 能力边界和平台</h3>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>判断原则</th>
+<th>典型动作(覆盖库存 → 全流程)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅ 全自动</td>
+<td>纯内部 · 可逆 · 不对外 · 低风险</td>
+<td>数据分析选品、内容生成(标题/详情/主图)、活动·券机制设计、投放方案设计、拉数据/日报 等</td>
+</tr>
+<tr>
+<td>⚠️ 需确认(授权担责)</td>
+<td><strong>对买家、平台等第三方有直接影响,或涉及商户履约/合规;后果由商户承担</strong></td>
+<td>上架/改价、改可售库存、发货/撤回发货、发布活动/发券、涉退款·投诉的客服回复 等</td>
+</tr>
+<tr>
+<td>❌ 不做 / 转交商户</td>
+<td>金额动作 + 能力外</td>
+<td>(金额→商户自付)Shopee Ads 充值/扣费、退款、付款/收款、充值保证金;(能力外)供应商谈判、品牌战略</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Agent 载体:Kimi-Claw</strong>
+<ul>
+<li>部署简单,适合个人 / 小团队即开即用</li>
+<li>自带丰富 skill,满足通用任务需求</li>
+<li>可对接电商平台 API,拉取运营数据(支撑现状对齐的扫描)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>1. User Flow 总览</h2>
+<blockquote>
+<p><strong>结构</strong>:7 个顺序阶段 + 1 个横切机制(失败兜底)。兜底是执行期可随时触发的子状态(非顺序步骤),故单列。</p>
+<p><strong>设计原则</strong></p>
+<ol>
+<li><strong>通用性</strong>:阶段框架任务无关、适配全部运营场景;任务差异仅体现为各阶段内子步骤的分拆,不为单一任务定制。</li>
+<li><strong>用户主导决策</strong>:关键界面状态(尤其规划展示)以<strong>提供选项、辅助决策</strong>为主,不替商家拍板,决策权始终归商家。</li>
+</ol>
+</blockquote>
+<pre><code>                    用户一句话模糊目标
+                          │
+                          ▼
+                ┌──────────────────┐
+                │ ① 意图捕获        │ 拆槽位(任务/对象/时间/隐含目标) + 判定任务类型
+                └────────┬─────────┘   ▶ 任务类型决定各阶段分拆出哪些子步骤
+                         ▼
+                ┌──────────────────┐
+                │ ② 能力预检        │ 该任务需要的授权/集成是否就位(按任务列出依赖项)
+                └────────┬─────────┘   缺 → 引导去授权 or 在方案里标灰&quot;不可用&quot;
+                         ▼
+                ┌──────────────────┐
+                │ ③ 现状对齐        │ 扫描(客观现状,按任务取数) + 澄清(主观意图,须问)
+                └────────┬─────────┘   ▶ 扫描结果可预填 / 削减澄清问题  ◄── 方案被否回到这
+                         ▼
+                ┌──────────────────┐
+                │ ④ 规划展示 ★      │ 可编辑执行清单 + ⚠️标记预告确认点 + 时间预估
+                └────────┬─────────┘   【确认点①】确认方向与范围
+                         ▼
+                ┌──────────────────┐
+                │ ⑤ 执行            │ 逐步汇报,中间产出可见
+                │   ├ 担责确认(上货/发货/改价…)→ 确认后 Agent 做
+                │   ├ 方向性决策(给选项)
+                │   └ 遇金额 → 转交商户(Agent 不经手)
+                └────────┬─────────┘
+                         ▼
+                ┌──────────────────┐
+                │ ⑥ 交付            │ 完成清单 / 执行证据 / 可复用模板 / 效果监控
+                └────────┬─────────┘
+                         ▼
+                ┌──────────────────┐
+                │ ⑦ 运行期托管      │ 监控 → 异常告警 → 回到 Agent 再决策(闭合回 ⑤ 确认点)
+                └──────────────────┘
+
+  ┌─ 横切机制(非顺序阶段,执行期可随时触发)──────────────────┐
+  │ ⚠ 失败兜底:再试 / 半自动 / 跳过 / 中止 —— 降级、不中断、归还控制权 │
+  └──────────────────────────────────────────────────────────┘
+</code></pre>
+<blockquote>
+<p><strong>通用性原则</strong>:这 7 个阶段是任务无关的通用逻辑,所有任务都套同一套;差异在于<strong>每个阶段会按任务需求分拆成不同数量、不同粒度的子步骤</strong></p>
+</blockquote>
+<hr>
+<h2>2. 阶段 1:意图捕获(Intent Capture)</h2>
+<p><strong>【阶段逻辑 · 通用】</strong></p>
+<ul>
+<li><strong>用户做的</strong>:输入一句模糊目标,或顺着开场提示选一类任务。</li>
+<li><strong>Agent 做的</strong>:
+<ul>
+<li>拆结构化槽位(任务类型 / 对象 / 时间 / 隐含目标)</li>
+<li>判定任务类型,决定各阶段分拆哪些子步骤(同一套阶段逻辑,不跳阶段)</li>
+</ul>
+</li>
+<li><strong>界面状态</strong>:
+<ul>
+<li>开场是一条用 emoji 列出<strong>可做任务</strong>的引导消息(顺带暗示能力边界)</li>
+<li>鼓励充分描述需求,缺口留 ③ 澄清</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>3. 阶段 2:能力预检(Capability Precheck)</h2>
+<p><strong>【阶段逻辑 · 通用】</strong></p>
+<ul>
+<li><strong>Agent 做的</strong>:
+<ul>
+<li>规划前先查该任务所需授权/集成是否就位</li>
+<li>缺则提示去授权,或在方案里标灰该步(注明原因),不规划做不了的步骤</li>
+</ul>
+</li>
+<li><strong>界面状态</strong>:一条消息把依赖项逐项 ✓/✗ 报出来</li>
+</ul>
+<hr>
+<h2>4. 阶段 3:现状对齐(Scan + Clarify)</h2>
+<p><strong>【阶段逻辑 · 通用】</strong> 把&quot;对齐到现实&quot;拆成互补的两半:<strong>扫描拿客观、澄清问主观</strong>。</p>
+<ul>
+<li><strong>扫描(客观 · Agent 自取)</strong>:按任务获取历史数据。</li>
+<li><strong>澄清(主观 · 必问)</strong>:只问&quot;扫不到、且影响方案结构&quot;的变量,尽量做选择题。
+两条硬规矩:
+<ul>
+<li>每个选项附一句基于扫描数据的理由,让商家据证据判断</li>
+<li>每题留「我来定 / 自定义」,选项只引导、不设限</li>
+</ul>
+</li>
+<li><strong>界面状态</strong>:
+<ul>
+<li>先报扫描结果</li>
+<li>再用 ❶❷❸ 列澄清题、每题 A/B/C/D,末尾「回字母即可」</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>5. 阶段 4:规划展示(Plan Preview)★ 最关键的一段</h2>
+<p><strong>【阶段逻辑 · 通用】</strong></p>
+<ul>
+<li>把预检+扫描+澄清转成<strong>可编辑执行清单</strong>:
+<ul>
+<li>开头:目标摘要 + 总耗时</li>
+<li>每步标注:动作 / ⚠️确认预告 / 预估产出</li>
+</ul>
+</li>
+<li><strong>界面状态</strong>:
+<ul>
+<li>整份清单一条结构化消息(emoji 编号 + ⚠️ + 缩进),末尾给指令</li>
+<li>预估基于扫描快照,执行时刷新</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>【确认点 ①】第一次确认——确认<strong>方向与范围</strong>(目标、这几步要不要做、预算量级能否接受),不涉逐字细节。</p>
+</blockquote>
+<hr>
+<h2>6. 阶段 5:执行(Execution)+ 关键确认点</h2>
+<p><strong>【阶段逻辑 · 通用】</strong></p>
+<ul>
+<li><strong>进度呈现</strong>:
+<ul>
+<li>逐步汇报,每步发「✅ 已完成 + 产出摘要」</li>
+<li>用户随时可「暂停」</li>
+</ul>
+</li>
+<li><strong>两类确认点</strong>(对应 ⚠️,都是&quot;停下拿授权、确认后 Agent 动手&quot;;可逆低风险不打断):
+<ul>
+<li>担责确认:上货 / 发货 / 改价 / 改库存 / 发券…</li>
+<li>方向性决策:需定方向的歧义</li>
+</ul>
+</li>
+<li><strong>界面状态</strong>:
+<ul>
+<li>进度连续消息流(每步 ✅/⚠️ + 摘要)</li>
+<li>需确认时停下,发带选项的消息等回复</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>7. 阶段 6:交付(Delivery)</h2>
+<p><strong>【阶段逻辑 · 通用】</strong> 一条结构化总结,四块:<strong>① 完成清单 / ② 执行证据 / ③ 可复用模板 / ④ 效果监控</strong>。</p>
+<ul>
+<li><strong>界面状态</strong>:
+<ul>
+<li>━ 分隔小标题 + emoji 列四块</li>
+<li>&quot;保存模板 / 查看看板&quot;靠关键词触发</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>8. 横切机制:失败兜底(Failure Handling)</h2>
+<blockquote>
+<p>兜底是执行期(⑤)可随时触发的子状态(非顺序阶段)。原则:<strong>降级不中断、归还控制权、保护已完成成果</strong>。</p>
+</blockquote>
+<h3>五种恢复方法</h3>
+<table>
+<thead>
+<tr>
+<th>动作</th>
+<th>行为</th>
+<th>方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>再试</td>
+<td>重跑该步</td>
+<td>—</td>
+</tr>
+<tr>
+<td>半自动</td>
+<td>Agent 备好材料、最后一步交人手动收尾,标&quot;已完成(降级)&quot;,继续</td>
+<td>向前</td>
+</tr>
+<tr>
+<td>跳过</td>
+<td>标跳过,继续</td>
+<td>向前</td>
+</tr>
+<tr>
+<td><strong>撤销这步</strong></td>
+<td>按&quot;改前快照&quot;把目标恢复到改动前,标&quot;已撤销 / 未执行&quot;(仅可逆 / 半可逆步骤出现)</td>
+<td>向后</td>
+</tr>
+<tr>
+<td>中止</td>
+<td>停掉后续,跳到交付,保留其余已完成成果</td>
+<td>全局</td>
+</tr>
+</tbody>
+</table>
+<h3>步骤可逆性分档(决定&quot;撤销&quot;是否出现)</h3>
+<table>
+<thead>
+<tr>
+<th>档</th>
+<th>判据</th>
+<th>示例步骤</th>
+<th>撤销</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>可逆</td>
+<td>改动仅在店铺内部、未对买家最终生效、可还原</td>
+<td>选品分析、商品优化、活动机制草稿、客服话术草稿</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>半可逆</td>
+<td>技术上能还原,但买家可能已看到</td>
+<td>商品上架、改价</td>
+<td>✅(撤销=下架 / 改回原价,话术标注&quot;只能止损、不能抹除已产生的曝光&quot;)</td>
+</tr>
+<tr>
+<td>不可逆</td>
+<td>花钱 / 对客承诺 / 已扣费</td>
+<td>Shopee Ads</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>9. 横切机制:对话呈现规范(关键界面状态)</h2>
+<ol>
+<li><strong>每类消息 = 一个主 emoji + 固定要素</strong>,可扫读、不刷屏(每类消息的具体要素已在各阶段「界面状态」给出,这里只立统一规范)。</li>
+<li><strong>每条关键消息开头带阶段位置标</strong> <code>[阶段 N/7 · 阶段名]</code>(执行期细到 <code>[步骤 N/M]</code>,即第 N 步 / 共 M 步),让商家随时知道&quot;走到流程哪一步&quot;。</li>
+<li><strong>服务三类沟通需求</strong>:告知/透明、交代/取证、能力披露/引导。</li>
+<li><strong>全程统一指令</strong>:暂停 / 继续 / 改 / 中止 / 看进度 / 展开N / 去掉N。</li>
+</ol>
+<p><strong>示例 ① · 澄清提问</strong>(选项带证据 + 留自定义):</p>
+<blockquote>
+<p>[阶段 3/7 · 现状对齐] 🔍 生成方案前确认 2 件事(回字母即可,每题也能「我来定」):
+❶ 核心目标 — A. 冲量(近30天基础好) · B. 清库存(滞销品多) · C. 我来定
+❷ 预算 — A. 稳(够现有量) · B. 加力 · C. 我来定金额</p>
+</blockquote>
+<p><strong>示例 ② · 担责确认</strong>(停下拿授权 · 三件套):</p>
+<blockquote>
+<p>[步骤 4/6] ⚠️ 这步要做[影响买家/店铺的动作],需你确认 · <strong>做什么</strong>(可核验)· <strong>代价/影响 + 能否撤</strong> · 👉 确认 / 改了再批 / 拒绝</p>
+</blockquote>
+</article></body>
+</html>
