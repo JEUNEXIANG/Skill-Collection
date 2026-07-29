@@ -1,0 +1,195 @@
+/* All Reading Companion injected UI. High z-index, isolated styling, never
+   inherits the host page's fonts/colors. */
+
+.rc-ui {
+  position: absolute;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  box-sizing: border-box;
+}
+
+.rc-chip {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.rc-chip:hover {
+  background: #333;
+}
+
+.rc-popup {
+  max-width: 360px;
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.rc-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.rc-selection {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.rc-pron {
+  color: #888;
+  font-size: 13px;
+}
+
+.rc-field {
+  margin-top: 6px;
+}
+
+.rc-meaning {
+  font-weight: 500;
+}
+
+.rc-explanation {
+  color: #333;
+}
+
+.rc-secondary {
+  color: #666;
+  font-size: 13px;
+}
+
+.rc-label {
+  display: inline-block;
+  color: #999;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 6px;
+}
+
+.rc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+}
+
+.rc-details {
+  margin-top: 4px;
+}
+
+.rc-diagram {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  background: #f6f6f6;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #333;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.rc-distinction {
+  margin-top: 8px;
+}
+
+.rc-distinction-scenario {
+  margin-top: 4px;
+  padding-left: 8px;
+  border-left: 2px solid #eee;
+  color: #666;
+  font-style: italic;
+}
+
+.rc-related {
+  margin-top: 8px;
+}
+
+.rc-related-row {
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+.rc-related-term {
+  font-weight: 600;
+}
+
+.rc-related-rel {
+  color: #666;
+}
+
+.rc-actions {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.rc-more {
+  margin-right: auto;
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 10px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #555;
+  cursor: pointer;
+}
+
+.rc-more:hover {
+  background: #f5f5f5;
+}
+
+.rc-save {
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 14px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.rc-save:hover {
+  background: #333;
+}
+
+.rc-save:disabled {
+  background: #2e7d32;
+  cursor: default;
+}
+
+.rc-error {
+  color: #b00020;
+  font-size: 13px;
+}
+
+.rc-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ddd;
+  border-top-color: #1a1a1a;
+  border-radius: 50%;
+  animation: rc-spin 0.7s linear infinite;
+}
+
+@keyframes rc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

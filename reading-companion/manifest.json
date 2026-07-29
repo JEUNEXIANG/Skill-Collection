@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Reading Companion",
+  "version": "0.2.0",
+  "description": "Select any word or phrase while reading and get its meaning as it applies in this article, in your native language.",
+  "permissions": ["storage", "sidePanel", "tabs"],
+  "host_permissions": ["https://api.deepseek.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Reading Companion — saved words"
+  }
+}
