@@ -12,13 +12,14 @@ import certifi
 TOKEN_PATH = os.path.expanduser("~/.hermes/google_token.json")
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
-SHEETS = {
-    "Weekly Live View": "1m4bZ11zDEHpVzQP1I4zxtFKs-vzXEYBk7NgMNJK5dpo",  # Updated 2026-05-28
-    "Reg Commercial Team": "1BmRS6VjIP5_RRfQs22pgm9Ap49G_EBZJIjJDCAhmAcg",  # Updated 2026-05-28
-    "Reg CNLS copy": "1cN29heWI-7trzBLMvEpznXslDmlCEmLHUcKDjT9uTqg",
-    "Archive": "1F99kNADGaRxiuxkxG2Gq3A7Xvoh_bG0EM2C0xYi8Ocs",
-    "Platform PC2": "11Qqg42jx_jAhfmkjr8JghVa4zwiVXdAsuo3aOGxvVKo",  # Updated 2026-05-28
-}
+# Real spreadsheet IDs live in sheet_ids.local.json (gitignored, not committed).
+# See sheet_ids.example.json for the expected shape.
+_SHEET_IDS_PATH = os.path.join(os.path.dirname(__file__), "sheet_ids.local.json")
+try:
+    with open(_SHEET_IDS_PATH) as _f:
+        SHEETS = json.load(_f)
+except FileNotFoundError:
+    SHEETS = {}
 
 
 def get_auth_headers():

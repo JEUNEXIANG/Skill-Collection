@@ -137,16 +137,18 @@ All tabs within each workbook are ordered **chronologically by date**.
 
 ## Sheet Registry
 
-> Fill in the Google Sheet IDs once available. Find the ID in the sheet URL:
+> Real Google Sheet IDs are kept out of version control in `sheet_ids.local.json`
+> (gitignored — see `sheet_ids.example.json` for the expected shape) and are
+> loaded into `gsu.SHEETS` at runtime. Find an ID in the sheet URL:
 > `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`
 
-| Alias | Full Workbook Name | Google Sheet ID |
-|---|---|---|---|
-| `[Weekly Live View]` | Copy of (Weekly Live View) SHP vs TTS ADG ADO Absolutes | `1m4bZ11zDEHpVzQP1I4zxtFKs-vzXEYBk7NgMNJK5dpo` (⚠️ Updated 2026-05-28 — old ID `1VjeWOSX6nX_oQiU8QnB98suG2siKovuJhoBzxTK-zeI` kept as fallback) |
-| `[Reg Commercial Team]` | Copy of [Reg Commercial Team] SOB ADG and ADO | `1BmRS6VjIP5_RRfQs22pgm9Ap49G_EBZJIjJDCAhmAcg` (⚠️ Updated 2026-05-28 — old ID `10kH9Welrxx7KJEOrtfWFshOrglsG-P6vTv9otwxsPho` kept as fallback) |
-| `[Reg CNLS copy]` | Copy of (Reg CNLS copy) SHP vs TTS ADG ADO Absolutes | `1cN29heWI-7trzBLMvEpznXslDmlCEmLHUcKDjT9uTqg` |
-| `[Archive]` | Copy of [Reg CNLS] Archive Platform SOB & PC2 | `1F99kNADGaRxiuxkxG2Gq3A7Xvoh_bG0EM2C0xYi8Ocs` |
-| `[Platform PC2]` | [Reg Commercial Team] Platform PC 2 Data | `11Qqg42jx_jAhfmkjr8JghVa4zwiVXdAsuo3aOGxvVKo` (⚠️ Updated 2026-05-28 — was `TODO`) |
+| Alias | Full Workbook Name | `gsu.SHEETS` key |
+|---|---|---|
+| `[Weekly Live View]` | Copy of (Weekly Live View) SHP vs TTS ADG ADO Absolutes | `"Weekly Live View"` |
+| `[Reg Commercial Team]` | Copy of [Reg Commercial Team] SOB ADG and ADO | `"Reg Commercial Team"` |
+| `[Reg CNLS copy]` | Copy of (Reg CNLS copy) SHP vs TTS ADG ADO Absolutes | `"Reg CNLS copy"` |
+| `[Archive]` | Copy of [Reg CNLS] Archive Platform SOB & PC2 | `"Archive"` |
+| `[Platform PC2]` | [Reg Commercial Team] Platform PC 2 Data | `"Platform PC2"` |
 
 ---
 
