@@ -97,6 +97,20 @@ Read table structure of the source tabs. Use `$GSI scan-sections` and present th
 
 ### ⚠️ Step 2 Implementation Details — CRITICAL LEARNINGS
 
+#### API Batch Size Limits (HTTP 400 on large writes)
+
+`values:batchUpdate` with more than ~15 data entries causes **HTTP 400 Bad Request** (Google's undocumented batch size limit). Always batch writes in chunks of **10 or fewer** entries. Chunks of 5-10 are reliable; 20+ fails even with valid data.
+
+**Pattern that works:**
+```python
+batch_size = 10
+for start in range(0, len(all_writes), batch_size):
+    chunk = all_writes[start:start+batch_size]
+    resp = values_batch_write(SID, {"valueInputOption": "USER_ENTERED", "data": chunk})
+```
+
+**Write full rows, not separate column ranges:** When writing ADG values to the destination, write each row as a single range (e.g. `'Tab'!D{dest_row}:U{dest_row}` = 18 cols) rather than separate D:K and N:U ranges. This halves the API calls and reduces batch-induced errors. The destination has SHP and TTS side by side in the same rows, so D:U covers SHP (D-K) + blanks (L-M) + TTS (N-U).
+
 #### Tab Name Quoting (HTTP 400 Errors)
 
 Source tab names with brackets (e.g. `[Weekly Live View] SHP/TTS ADG ADO`) cause HTTP 400 errors with `gsu.values_get()` and `urllib.parse.quote()` on the full range string. **Fix:** Use `values:batchGet` endpoint with the `ranges` parameter and `doseq=True` for reading:
